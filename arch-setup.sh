@@ -1,14 +1,6 @@
 #!/bin/bash
 
 
-# Make sure WiFi network is accessible
-while [[ "0%" != $(ping -c 3 8.8.8.8 | grep "packet loss" | cut -d " " -f 6) ]]
-do
-  echo -e "Connect to a WiFi network\n"
-  wifi-menu
-done
-
-
 # Use systemd-boot, since it's EFI
 bootctl --path=/boot install
 # Configure bootloader defaults

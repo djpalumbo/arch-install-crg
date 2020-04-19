@@ -6,14 +6,6 @@ rm /mnt/boot/vmlinuz-linux
 rm /mnt/boot/intel-ucode.img
 
 
-# Make sure WiFi network is accessible
-while [[ "0%" != $(ping -c 3 8.8.8.8 | grep "packet loss" | cut -d " " -f 6) ]]
-do
-  echo -e "Connect to a WiFi network\n"
-  wifi-menu
-done
-
-
 # Sync database, update keyring, and update pacman mirrorlist
 pacman -Sy
 pacman -S --noconfirm archlinux-keyring reflector

@@ -1,35 +1,18 @@
 #!/bin/bash
 
 
-# Use systemd-boot, since it's EFI
-bootctl --path=/boot install
-# Configure bootloader defaults
-echo -e "default arch\ntimeout 3\neditor 0" > /boot/loader/loader.conf
-
-
-# Copy default arch entry to boot loader entries
-cp /usr/share/systemd/bootctl/arch.conf /boot/loader/entries/
-# Fix options
-sed -i -e "s/rootfstype=XXXX add_efi_memmap/rootfstype=ext4 add_efi_memmap rw/g" /boot/loader/entries/arch.conf
-# Replace UUID with that of the new root partition
-rootpart=$(lsblk | grep "/$" | cut -d " " -f 1 | sed "s/.*s/s/g")
-sed -i -e "s/PARTUUID=XXXX/PARTUUID=$(blkid /dev/$rootpart | cut -d "\"" -f 6)/g" /boot/loader/entries/arch.conf
-# Ensure that intel microcode is used
-sed -i -e "/vmlinuz-linux/a initrd  \/intel-ucode.img" /boot/loader/entries/arch.conf
-
-
-# Enable hibernation
+# Enable hibernation (passing kernel parameters thru GRUB)
 swappart=$(lsblk | grep "SWAP" | cut -d " " -f 1 | sed "s/.*s/s/g")
-echo "options resume=UUID=$(blkid /dev/$swappart | cut -d "\"" -f 2)" >> /boot/loader/entries/arch.conf
+sed -i -e "s/GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash\"/GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash resume=UUID=$(blkid /dev/$swappart | cut -d '"' -f 2)\"/g" /etc/default/grub
 # Configure the initramfs
-sed -i -e "s/^HOOKS.*/HOOKS=\"base udev resume autodetect modconf block filesystems keyboard fsck\"/g" /etc/mkinitcpio.conf
+sed -i -e "s/^HOOKS.*/HOOKS=\"base udev resume keyboard autodetect modconf block fsck filesystems\"/g" /etc/mkinitcpio.conf
 # Rebuild the initramfs
 mkinitcpio -c /etc/mkinitcpio.conf -g /boot/initramfs-linux.img
 
 
-# Create generic mount locations
-mkdir /mnt/usb
-mkdir /mnt/sd
+# Set up the boot loader (GRUB) ‒ note: this system uses GPT
+grub-install --target=i386-pc /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
 
 
 # Set the root password
@@ -91,13 +74,11 @@ Exec = /bin/sh -c \"reflector --country 'United States' --latest 200 --age 24 --
   > /etc/pacman.d/hooks/mirrorupgrade.hook
 
 
-# Change the hostname to 'arch', configure hosts file
-echo "arch" > /etc/hostname
-echo "127.0.1.1	arch.localdomain	arch" >> /etc/hosts
-
-
-# Load the generic bluetooth driver, if not already loaded
-modprobe btusb
+# Change the hostname; configure hosts file
+echo "crgdesktop" > /etc/hostname
+echo "127.0.0.1	localhost" >> /etc/hosts
+echo "::1		localhost" >> /etc/hosts
+echo "127.0.1.1	crgdesktop.localdomain	crgdesktop" >> /etc/hosts
 
 
 # Make sure everything is up to date
@@ -105,6 +86,7 @@ pacman -Syu
 
 
 ################################################################################
+
 
 # Enable the multilib repository for pacman
 multilib=$(awk "/\#\[multilib\]/{ print NR; exit }" /etc/pacman.conf)
@@ -118,26 +100,9 @@ sed -i -e "s/#Color/Color/g" /etc/pacman.conf
 sed -i -e "s/#SystemMaxUse=/SystemMaxUse=64M/g" /etc/systemd/journald.conf
 
 
-# Set up SDDM
-cp -r /usr/lib/sddm/sddm.conf.d /etc/
-# Install the Aerial SDDM theme
-pacman -S qt5-multimedia  gst-libav  phonon-qt5-gstreamer  gst-plugins-good
-git clone https://github.com/3ximus/aerial-sddm-theme \
-  /usr/share/sddm/themes/aerial
-sed -i -e "s/Current=/Current=aerial/g" /etc/sddm.conf.d/sddm.conf
-
-
 # Start certain daemons on boot
-systemctl enable NetworkManager.service
-systemctl enable wpa_supplicant.service
-systemctl enable sddm.service
 systemctl enable tlp.service
 systemctl enable tlp-sleep.service
-systemctl enable bluetooth.service
-#systemctl enable insync@$username.service
-#systemctl enable mariadb.service
-#systemctl enable mongodb.service
-#systemctl enable docker.service
 
 
 # Mask certain systemd services so that TLP power management works correctly
@@ -148,7 +113,7 @@ systemctl mask systemd-rfkill.socket
 ################################################################################
 
 # Switch from root to user
-wget https://raw.githubusercontent.com/djpalumbo/arch-install-crg/master/arch-setup_user.sh
-chmod +x arch-setup_user.sh
-su $username -c ./arch-setup_user.sh
+wget https://raw.githubusercontent.com/djpalumbo/arch-install-crg/master/arch-user-setup.sh
+chmod +x arch-user-setup.sh
+su $username -c ./arch-user-setup.sh
 

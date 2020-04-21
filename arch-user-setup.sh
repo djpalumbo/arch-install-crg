@@ -17,13 +17,9 @@ rm -rf /tmp/yay
 
 # Install packages from the AUR
 yay -S --noconfirm                                                             \
-  ttf-iosevka  ttf-font-awesome-4  ttf-material-design-icons  ttf-ms-fonts     \
-\
   chromium-widevine                                                            \
 \
 
-
-################################################################################
 
 # Create user directories
 xdg-user-dirs-update
@@ -32,8 +28,6 @@ xdg-user-dirs-update
 # Use zsh instead of bash
 chsh -s $(which zsh)
 
-
-################################################################################
 
 # Done!
 reboot

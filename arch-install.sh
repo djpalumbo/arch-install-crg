@@ -8,13 +8,13 @@ rm /mnt/boot/intel-ucode.img
 
 # Sync database, update keyring, and update pacman mirrorlist
 pacman -Sy
-pacman -S --noconfirm archlinux-keyring reflector
+pacman -S --noconfirm archlinux-keyring  reflector
 reflector --verbose --country 'United States' --sort rate --save /etc/pacman.d/mirrorlist
 
 
 # Install packages
 pacstrap -i /mnt --noconfirm                                                   \
-  base  base-devel                                                             \
+  base  linux  linux-firmware                                                  \
 \
   linux-headers                                                                \
 \
@@ -22,24 +22,20 @@ pacstrap -i /mnt --noconfirm                                                   \
 \
   wget                                                                         \
 \
-  efibootmgr  intel-ucode  exfat-utils                                         \
+  grub  intel-ucode  exfat-utils                                               \
 \
   tlp                                                                          \
 \
-  wpa_supplicant  dialog  wireless_tools                                       \
-  networkmanager  network-manager-applet                                       \
-  dhclient  gnome-keyring                                                      \
-  networkmanager-openconnect                                                   \
-\
+  xf86-video-nouveau                                                           \
   xorg-server  xorg-xinit  xorg-xprop  mesa                                    \
-  xf86-video-intel                                                             \
 \
   libinput  xf86-input-libinput  xf86-input-synaptics                          \
   xorg-xinput  xorg-xev                                                        \
   xclip                                                                        \
 \
   pulseaudio  pulseaudio-alsa  pavucontrol  alsa-utils                         \
-  blueman  pulseaudio-bluetooth  bluez  bluez-libs  bluez-utils                \
+\
+  plasma-meta                                                                  \
 \
   tree                                                                         \
   htop  powertop                                                               \
@@ -49,19 +45,14 @@ pacstrap -i /mnt --noconfirm                                                   \
   neovim                                                                       \
   ranger                                                                       \
 \
+  p7zip                                                                        \
+\
   xdg-user-dirs                                                                \
 \
   chromium                                                                     \
-  pepper-flash                                                                 \
-\
   libreoffice                                                                  \
-\
-  p7zip                                                                        \
-\
   audacity                                                                     \
   gimp                                                                         \
-\
-  parted  gparted                                                              \
 \
   neofetch                                                                     \
 \

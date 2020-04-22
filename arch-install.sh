@@ -8,8 +8,8 @@ rm /mnt/boot/intel-ucode.img
 
 # Sync database, update keyring, and update pacman mirrorlist
 pacman -Sy
-pacman -S --noconfirm archlinux-keyring  reflector
-reflector --verbose --country 'United States' --sort rate --save /etc/pacman.d/mirrorlist
+#pacman -S --noconfirm archlinux-keyring  reflector
+#reflector --verbose --country 'United States' --sort rate --save /etc/pacman.d/mirrorlist
 
 
 # Install packages

@@ -12,6 +12,14 @@ mkinitcpio -c /etc/mkinitcpio.conf -g /boot/initramfs-linux.img
 
 # Set up the boot loader (GRUB) ‒ note: this system uses GPT
 grub-install --target=i386-pc /dev/sda
+echo -e "menuentry \"Reboot\" {
+	echo \"System rebooting...\"
+	reboot
+}\n
+menuentry \"Shutdown\" {
+	echo \"System shutting down...\"
+	halt
+}" > /etc/grub.d/40_custom
 grub-mkconfig -o /boot/grub/grub.cfg
 
 
